@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
+  "private": true,
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "prettier": "^1.8.1",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4"
+  }
+}
