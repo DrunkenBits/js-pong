@@ -51,7 +51,12 @@ const ball = Object.assign({}, shape, {
   vx: 250,
   vy: 250,
 })
-const player1 = {y: 0}
+const player1 = {
+  height: PLAYER_HEIGHT,
+  width: SPACING_UNIT,
+  score: 0,
+  y: 0,
+}
 const player2 = Object.assign({}, player1)
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
