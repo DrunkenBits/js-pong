@@ -1,63 +1,90 @@
 import {injectGlobal} from 'styled-components'
-import * as R from 'ramda'
+
+const COLOR_BG = '#292A44'
+const COLOR_FG = '#4AD481'
+const SPACING_UNIT = 10
+const PLAYER_HEIGHT = SPACING_UNIT * 6
 
 injectGlobal`
+  :root {
+    background-color: ${COLOR_BG};
+  }
+
   body {
     margin: 0;
   }
 
   #game {
-    border: 1px solid;
-    background-color: black;
-    margin: 0 auto;
+    margin-right: auto;
+    margin-left: auto;
     display: block;
     margin-top: 2em;
   }
 `
 
-const createDrawBall = R.curry(({ctx, ballSize}, x, y) =>
-  ctx.fillRect(x, y, ballSize, ballSize),
-)
-
-const createDrawPlayer1 = R.curry(
-  ({ctx, gameHeight, playerHeight, playerWidth}, y) => {
-    const realY = y + playerHeight > gameHeight ? gameHeight - playerHeight : y
-
-    ctx.fillRect(0, realY, playerWidth, playerHeight)
+const shape = {
+  getLeft() {
+    return this.x
   },
-)
-const createDrawPlayer2 = R.curry(
-  ({ctx, gameWidth, gameHeight, playerHeight, playerWidth}, y) => {
-    const realY = y + playerHeight > gameHeight ? gameHeight - playerHeight : y
-
-    ctx.fillRect(gameWidth - playerWidth, realY, playerWidth, playerHeight)
+  getRight() {
+    return this.x + this.width
   },
-)
+  getTop() {
+    return this.y
+  },
+  getBottom() {
+    return this.y + this.height
+  },
+}
 
+/**
+ * ball collision
+ * p1 collision
+ * p2 position
+ * p2 collision
+ */
+const ball = Object.assign({}, shape, {
+  height: SPACING_UNIT,
+  width: SPACING_UNIT,
+  x: 100,
+  y: 50,
+  vx: 250,
+  vy: 250,
+})
+const player1 = {y: 0}
+const player2 = Object.assign({}, player1)
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
-const gameWidth = canvas.offsetWidth
-const gameHeight = canvas.offsetHeight
-const playerHeight = 60
-const playerWidth = 10
-const ballSize = playerWidth
 
-const drawBall = createDrawBall({ctx, ballSize})
-const drawPlayer1 = createDrawPlayer1({
-  ctx,
-  gameHeight,
-  playerWidth,
-  playerHeight,
-})
-const drawPlayer2 = createDrawPlayer2({
-  ctx,
-  gameHeight,
-  gameWidth,
-  playerHeight,
-  playerWidth,
-})
+const update = dt => {
+  ball.x += ball.vx * dt
+  ball.y += ball.vy * dt
 
-ctx.fillStyle = 'white'
-drawBall(40, 10)
-drawPlayer1(1000)
-drawPlayer2(1000)
+  if (ball.getLeft() < 0 || ball.getRight() > canvas.width) {
+    ball.vx = -ball.vx
+  }
+
+  if (ball.getTop() < 0 || ball.getBottom() > canvas.height) {
+    ball.vy = -ball.vy
+  }
+
+  ctx.fillStyle = COLOR_BG
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.fillStyle = COLOR_FG
+  ctx.fillRect(ball.x, ball.y, ball.width, ball.height)
+
+  ctx.strokeStyle = COLOR_FG
+  ctx.strokeRect(0, 0, canvas.width, canvas.height)
+}
+
+let lastTime
+const tick = millis => {
+  if (lastTime) {
+    update((millis - lastTime) / 1000)
+  }
+  lastTime = millis
+  requestAnimationFrame(tick)
+}
+
+tick()
