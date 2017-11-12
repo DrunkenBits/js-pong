@@ -1,4 +1,5 @@
 import {injectGlobal} from 'styled-components'
+import * as R from 'ramda'
 
 const COLOR_BG = '#292A44'
 const COLOR_FG = '#4AD481'
@@ -51,15 +52,24 @@ const ball = Object.assign({}, shape, {
   vx: 250,
   vy: 250,
 })
-const player1 = {
-  height: PLAYER_HEIGHT,
-  width: SPACING_UNIT,
-  score: 0,
-  y: 0,
-}
-const player2 = Object.assign({}, player1)
+const createPlayer = R.curry((y, x) =>
+  Object.assign({}, shape, {
+    height: SPACING_UNIT * 10,
+    width: SPACING_UNIT * 2,
+    score: 0,
+    x,
+    y,
+  }),
+)
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
+
+const createCenteredPlayer = createPlayer(canvas.height / 2 - SPACING_UNIT * 5)
+
+const players = [
+  createCenteredPlayer(20),
+  createCenteredPlayer(canvas.width - SPACING_UNIT * 2 - 20),
+]
 
 const update = dt => {
   ball.x += ball.vx * dt
@@ -81,6 +91,10 @@ const update = dt => {
 
   ctx.strokeStyle = COLOR_FG
   ctx.strokeRect(0, 0, canvas.width, canvas.height)
+
+  players.forEach(player =>
+    ctx.fillRect(player.x, player.y, player.width, player.height),
+  )
 }
 
 let lastTime
